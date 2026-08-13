@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>חידון מסכת תענית - אונליין בזמן אמת</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        talmud: {
+                            50: '#fdfbf7',
+                            100: '#f7f2e7',
+                            200: '#ebdcc3',
+                            600: '#a3753f',
+                            700: '#85592e',
+                            800: '#5c3a1d',
+                            900: '#38220f',
+                        },
+                        gold: {
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Heebo', 'Inter', 'sans-serif'],
+                        serif: ['David Libre', 'Frank Ruhl Hofshi', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Hofshi:wght@500;700;900&family=Heebo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Heebo', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            background-image: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 75%);
+            min-height: 100vh;
+        }
+        .talmud-font {
+            font-family: 'Frank Ruhl Hofshi', serif;
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .gold-border {
+            border: 1px solid rgba(217, 119, 6, 0.4);
+        }
+        .pulse-gold {
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-gold-500 selection:text-slate-900">
+    <div id="root"></div>
+
+    <script type="module">
+        // Firebase Integration (ES Module import)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        window.FirebaseModule = {
+            initializeApp, getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged,
+            getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, collection
+        };
+    </script>
+
+    <script type="text/babel">
+        
+        // 15 Comprehensive Questions on Masechet Taanit up to Daf 15
+        const TAANIT_QUESTIONS = [
+            {
+                id: 1,
+                question: "השלם את המאמר (דף ח' ע\"א): אמר ריש לקיש: מהו שכתוב 'אם ישוך הנחש בלא לחש...'?",
+                options: [
+                    "אין רפואה למכת נחש",
+                    "ואין יתרון לבעל הלשון",
+                    "ואין שלום לרשעים",
+                    "ואין משיבין את הארי לאחר מיתה"
+                ],
+                correctAnswer: 1,
+                source: "מסכת תענית דף ח' ע\"א",
+                explanation: "הגמרא דורשת שלעתיד לבוא נאספות כל החיות אצל הנחש ושואלות אותו: ארי דורס ואוכל, זאב טורף ואוכל, אתה מה הנאה יש לך? והוא משיב: 'ואין יתרון לבעל הלשון' - בעל לשון הרע אינו נהנה ורק מזיק."
+            },
+            {
+                id: 2,
+                question: "מדוע קבע רבי יוחנן (בדף ה' ע\"ב): 'אין מסיחין בשעת הסעודה'?",
+                options: [
+                    "משום כבוד המאכלים והברכה",
+                    "שמא יקדים קנה לושט ויבוא לידי סכנה",
+                    "כדי שלא יפסיד בברכה אחרונה",
+                    "משום גזל זמנו של המארח"
+                ],
+                correctAnswer: 1,
+                source: "מסכת תענית דף ה' ע\"ב",
+                explanation: "רבי יוחנן קבע שאין לדבר בזמן הסעודה שמא יפתח הקנה בשעת הבליעה ויקדים הקנה לושט, וייכנס המאכל לקנה הנשימה ויבוא לידי סכנת חנק."
+            },
+            {
+                id: 3,
+                question: "מתי מתחילים להזכיר 'גבורות גשמים' (משיב הרוח ומוריד הגשם) לפי דעת רבי אליעזר?",
+                options: [
+                    "מיום טוב הראשון של חג הסוכות",
+                    "מיום טוב האחרון של חג הסוכות (שמיני עצרת)",
+                    "בשבעה במרחשוון",
+                    "בשבעה עשר במרחשוון"
+                ],
+                correctAnswer: 0,
+                source: "משנה תענית דף ב' ע\"א",
+                explanation: "רבי אליעזר אומר מיום טוב הראשון של חג הסוכות מתחיל להזכיר, ואילו רבי יהושע אומר מיום טוב האחרון של חג הסוכות."
+            },
+            {
+                id: 4,
+                question: "באיזה תאריך מתחילים לשאול גשמים ('ותן טל ומטר') בארץ ישראל בברכת השנים?",
+                options: [
+                    "באיסרו חג של סוכות",
+                    "בג' במרחשוון",
+                    "בשבעה במרחשוון",
+                    "בראש חודש כסלו"
+                ],
+                correctAnswer: 2,
+                source: "משנה תענית דף י' ע\"א",
+                explanation: "בשבעה במרחשוון מתחילים לשאול גשמים בארץ ישראל, כדי שיגיע אחרון שבישראל המתרגל ועולה לרגל לנהר פרת לביתו בבטחה בלי גשמים."
+            },
+            {
+                id: 5,
+                question: "מה הדין אם הגיע שבעה עשר במרחשוון ולא ירדו גשמים?",
+                options: [
+                    "גורזרים מיד שבע תעניות על כל הציבור",
+                    "מתחילים היחידים להתענות שלוש תעניות (שני, חמישי ושני)",
+                    "נוהגים מנהגי אבלות מלאים",
+                    "מוציאים את התיבה לרחובה של עיר"
+                ],
+                correctAnswer: 1,
+                source: "משנה תענית דף י\"ב ע\"א",
+                explanation: "הגיע שבעה עשר במרחשוון ולא ירדו גשמים - התחילו היחידים (תלמידי חכמים ומנהיגי הציבור) להתענות שלוש תעניות: שני, חמישי ושני."
+            },
+            {
+                id: 6,
+                question: "איזה מבין הדינים הבאים מותר בשלוש התעניות הראשונות שגוזרים על הציבור?",
+                options: [
+                    "מותרים בעשיית מלאכה, ברחיצה, בסיכה, בנעילת הסנדל ובתשמיש המיטה",
+                    "אסורים במלאכה וברחיצה בלבד",
+                    "אסורים בנעילת הסנדק ובתשמיש המיטה",
+                    "חייבים לפתוח את החנויות בלילה בלבד"
+                ],
+                correctAnswer: 0,
+                source: "משנה תענית דף י\"ב ע\"ב",
+                explanation: "שלוש תעניות ראשונות של ציבור: אוכלים ושתים מבעוד יום, ומותרים בעשיית מלאכה, ברחיצה, בסיכה, בנעילת הסנדל ובתשמיש המיטה."
+            },
+            {
+                id: 7,
+                question: "מה מתווסף בשלוש התעניות האמצעיות שגוזרים על הציבור?",
+                options: [
+                    "מוציאים את התיבה לרחובה של עיר בלבד",
+                    "אסורים במלאכה, רחיצה, סיכה, נעילת הסנדל ותשמיש המיטה, ונועלים את החנויות",
+                    "תענית רצופה של שלוש יממות",
+                    "תקעת חצוצרות בכל בית כנסת"
+                ],
+                correctAnswer: 1,
+                source: "משנה תענית דף י\"ב ע\"ב",
+                explanation: "בשלוש התעניות האמצעיות מחמירים: אסורים במלאכה, ברחיצה, בסיכה, בנעילת הסנדל ובתשמיש המיטה, ונועלים את החנויות (פרט למכירה מועטת בצנעה)."
+            },
+            {
+                id: 8,
+                question: "כמה ברכות מוסיפים בתפילת עמידה בשבע התעניות האחרונות של הציבור?",
+                options: [
+                    "מוסיפים 3 ברכות (סך הכל 21)",
+                    "מוסיפים 6 ברכות (סך הכל 24 ברכות)",
+                    "מוסיפים 12 ברכות (סך הכל 30)",
+                    "אין מוסיפים ברכות, רק אומרים עננו"
+                ],
+                correctAnswer: 1,
+                source: "משנה תענית דף ט\"ו ע\"א",
+                explanation: "בשבע תעניות אחרונות מוסיפים שש ברכות על שמונה עשרה הברכות הרגילות, והן כוללות פסוקי זכרונות ושופרות ומענה לה' (סך הכל 24 ברכות)."
+            },
+            {
+                id: 9,
+                question: "מה נאמר בגמרא בדף ח' ע\"א על מפתח של גשמים?",
+                options: [
+                    "נמסר לשר המלאכים מטטרון",
+                    "הוא בידו של הקב\"ה בלבד ולא נמסר ביד שליח",
+                    "נמסר לאליהו הנביא בכל חורף",
+                    "נמסר לחכמי הסנהדרין"
+                ],
+                correctAnswer: 1,
+                source: "מסכת תענית דף ח' ע\"א",
+                explanation: "אמר רבי יוחנן: ג' מפתחות בידו של הקב\"ה שלא נמסרו ביד שליח: מפתח של חיה (לידה), מפתח של תחיית המתים, ומפתח של גשמים."
+            },
+            {
+                id: 10,
+                question: "היכן היו מוציאים את התיבה בשבע תעניות אחרונות לפי המשנה בדף ט\"ו ע\"א?",
+                options: [
+                    "לבית המקדש",
+                    "לרחובה של עיר, ונותנים אפר מקלה על גבי התיבה ועל ראש הנשיא ואב בית דין",
+                    "לבית העלמין",
+                    "לראש ההר הגבוה שבסביבה"
+                ],
+                correctAnswer: 1,
+                source: "משנה תענית דף ט\"ו ע\"א",
+                explanation: "סדר תעניות כיצד? מוציאין את התיבה לרחובה של עיר ונותנין אפר מקלה על גבי התיבה ועל ראש הנשיא ועל ראש אב בית דין וכל אחד ואחד נוטל ונותן בראשו."
+            },
+            {
+                id: 11,
+                question: "מה אומר הזקן שבשער בדברי הכיבושים ברחובה של עיר (דף ט\"ו ע\"א)?",
+                options: [
+                    "אל תיראו ואל תחתּו כי ה' אלהיכם עמכם",
+                    "אחינו, לא נאמר באנשי נינוה וירא האלקים את שקם... אלא וירא האלקים את מעשיהם",
+                    "צעקו אל ה' בכל לבבכם והוא יענה אתכם",
+                    "דעו כי עונותינו הטו אלה והחטאים מנעו הטוב"
+                ],
+                correctAnswer: 1,
+                source: "משנה תענית דף ט\"ו ע\"א",
+                explanation: "הזקן אומר לפניהן דברי כיבושין: 'אחינו, לא נאמר באנשי נינוה וירא האלהים את שקם ואת תעניתם, אלא וירא האלהים את מעשיהם כי שבו מדרכם הרעה'."
+            },
+            {
+                id: 12,
+                question: "מה אמר רבי יוחנן בדף ה' ע\"ב לגבי יעקב אבינו?",
+                options: [
+                    "יעקב אבינו לא מת (מה זרעו בחיים אף הוא בחיים)",
+                    "יעקב אבינו נטמן במערת המכפלה בו ביום",
+                    "יעקב אבינו לא בכה מעולם",
+                    "יעקב אבינו התענה ארבעים יום"
+                ],
+                correctAnswer: 0,
+                source: "מסכת תענית דף ה' ע\"ב",
+                explanation: "אמר רבי יוחנן: יעקב אבינו לא מת! הקשה רב נחמן: וכי בכדי חנטו חנטייא וספדו ספדייא? אמר לו: מקרא אני דורש 'ואתה אל תירא עבדי יעקב... כי הנני מושיעך מרחוק ואת זרעך מארץ שבים', מקיש הוא לזרעו: מה זרעו בחיים אף הוא בחיים."
+            },
+            {
+                id: 13,
+                question: "למה נמשלו דברי תורה לפי דברי רבי חנינא בר אידי בדף ז' ע\"א?",
+                options: [
+                    "למים - מה מים מניחים מקום גבוה והולכים למקום נמוך, אף דברי תורה אין מתקיימין אלא במי שדעתו שפלה",
+                    "לאש - אוכלת ואינה כלה",
+                    "לזהב טהור - ככל שמזקקים אותו הוא מצהיר יותר",
+                    "לאבן שואבת - שמושכת אליה את הלבבות"
+                ],
+                correctAnswer: 0,
+                source: "מסכת תענית דף ז' ע\"א",
+                explanation: "למה נמשלו דברי תורה כמים, כדכתיב 'הוי כל צמא לכו למים'? לומר לך: מה מים מניחין מקום גבוה והולכין למקום נמוך, אף דברי תורה אין מתקיימין אלא במי שדעתו שפלה."
+            },
+            {
+                id: 14,
+                question: "מתי מתפללים תפילת 'נעילה' לפי הנדון במסכת תענית?",
+                options: [
+                    "בכל יום מימי החול",
+                    "בכל תענית שני וחמישי שביחידים",
+                    "בשבע התעניות האחרונות שגוזרים על הציבור (וביום הכיפורים)",
+                    "רק בערב ראש השנה"
+                ],
+                correctAnswer: 2,
+                source: "מסכת תענית דף י\"ב ע\"ב / דף ט\"ו ע\"א",
+                explanation: "תפילת נעילה נתקנה בשבע תעניות אחרונות של הציבור וביום הכיפורים, שבהן היו מתפללים ארבע תפילות ביום (שחרית, מנחה, נעילה ומוסף/ברכות נוספות)."
+            },
+            {
+                id: 15,
+                question: "מה אמר רבי אמי בדף ח' ע\"א על תפילה של תענית שמקובלת בשמים?",
+                options: [
+                    "אין תפילתו של אדם נשמעת אלא אם כן משים נפשו בכפו (מתפלל בכוונה שלמה)",
+                    "אין תפילה נשמעת אלא מבית הכנסת בציבור",
+                    "תפילת תענית צריכה להיות בלחש בלבד",
+                    "כל המתענה סתם אינו נענה אלא אם כן פירש חטאיו"
+                ],
+                correctAnswer: 0,
+                source: "מסכת תענית דף ח' ע\"א",
+                explanation: "אמר רבי אמי: אין תפילתו של אדם נשמעת אלא אם כן משים נפשו בכפו, שנאמר 'נשא לבבנו אל כפים אל אל בשמים' - שיכוון לבו בתפילה ויקריב את נפשו."
+            }
+        ];
+
+
+        // App Constants & Firebase Setup
+        const APP_ID = typeof __app_id !== 'undefined' ? __app_id : 'taanit-quiz-app';
+        let db = null;
+        let auth = null;
+        let currentUser = null;
+
+        // Sound Effects generator using Web Audio API (Tone/AudioContext)
+        const playSound = (type) => {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                if (type === 'correct') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+                    osc.frequency.exponentialRampToValueAtTime(659.25, ctx.currentTime + 0.1); // E5
+                    osc.frequency.exponentialRampToValueAtTime(783.99, ctx.currentTime + 0.2); // G5
+                    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.4);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, ctx.currentTime);
+                    osc.frequency.linearRampToValueAtTime(130, ctx.currentTime + 0.25);
+                    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.3);
+                } else if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, ctx.currentTime);
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.05);
+                }
+            } catch(e) {
+                // Audio context fallback silent
+            }
+        };
+
+        // Custom Modal UI helper
+        const Toast = ({ message, type, onClose }) => {
+            if (!message) return null;
+            return (
+                <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 animate-bounce">
+                    <div className={`px-6 py-3 rounded-xl shadow-2xl flex items-center space-x-3 rtl:space-x-reverse font-bold text-white border ${type === 'error' ? 'bg-red-900/90 border-red-500' : 'bg-emerald-900/90 border-emerald-500'}`}>
+                        <i className={`fas ${type === 'error' ? 'fa-exclamation-triangle text-red-400' : 'fa-check-circle text-emerald-400'} text-xl`}></i>
+                        <span>{message}</span>
+                        <button onClick={onClose} className="mr-3 opacity-70 hover:opacity-100"><i className="fas fa-times"></i></button>
+                    </div>
+                </div>
+            );
+        };
+
+
+        function App() {
+            // Screen state: 'WELCOME' | 'LOBBY' | 'QUIZ' | 'SUMMARY'
+            const [mode, setMode] = useState('WELCOME'); 
+            const [isHost, setIsHost] = useState(false);
+            const [isSolo, setIsSolo] = useState(false);
+
+            // User Info
+            const [userName, setUserName] = useState(localStorage.getItem('taanit_user_name') || '');
+            const [userId, setUserId] = useState('');
+            const [roomCode, setRoomCode] = useState('');
+            const [inputRoomCode, setInputRoomCode] = useState('');
+
+            // Game State
+            const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
+            const [selectedAnswer, setSelectedAnswer] = useState(null);
+            const [score, setScore] = useState(0);
+            const [userAnswersHistory, setUserAnswersHistory] = useState([]);
+            const [timer, setTimer] = useState(25);
+            const [isTimerActive, setIsTimerActive] = useState(false);
+            const [answerSubmitted, setAnswerSubmitted] = useState(false);
+
+            // Room / Firebase state
+            const [roomData, setRoomData] = useState(null);
+            const [players, setPlayers] = useState([]);
+            const [toastMessage, setToastMessage] = useState(null);
+            const [firebaseReady, setFirebaseReady] = useState(false);
+
+            const showToast = (msg, type = 'info') => {
+                setToastMessage({ text: msg, type });
+                setTimeout(() => setToastMessage(null), 4000);
+            };
+
+            // Initialize Firebase Auth & Connection
+            useEffect(() => {
+                const initFb = async () => {
+                    try {
+                        if (window.FirebaseModule && typeof __firebase_config !== 'undefined') {
+                            const { initializeApp, getAuth, signInAnonymously, signInWithCustomToken, getFirestore } = window.FirebaseModule;
+                            const fbConfig = JSON.parse(__firebase_config);
+                            const app = initializeApp(fbConfig);
+                            auth = getAuth(app);
+                            db = getFirestore(app);
+
+                            let userCred;
+                            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                                userCred = await signInWithCustomToken(auth, __initial_auth_token);
+                            } else {
+                                userCred = await signInAnonymously(auth);
+                            }
+                            currentUser = userCred.user;
+                            setUserId(currentUser.uid);
+                            setFirebaseReady(true);
+                        } else {
+                            // Fallback offline UUID
+                            setUserId('user_' + Math.random().toString(36).substring(2, 9));
+                        }
+                    } catch (err) {
+                        console.error('Firebase Auth error:', err);
+                        setUserId('user_' + Math.random().toString(36).substring(2, 9));
+                    }
+                };
+                initFb();
+            }, []);
+
+            // Listen to Room updates in Firebase (Rule 1 & Rule 3 compliant)
+            useEffect(() => {
+                if (!db || !roomCode) return;
+
+                const { doc, onSnapshot } = window.FirebaseModule;
+                const roomRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'rooms', roomCode);
+
+                const unsubscribe = onSnapshot(roomRef, (snapshot) => {
+                    if (snapshot.exists()) {
+                        const data = snapshot.data();
+                        setRoomData(data);
+                        setPlayers(data.players || []);
+
+                        // Sync state from Host if playing in online room
+                        if (!isSolo) {
+                            if (data.status === 'PLAYING' && mode === 'LOBBY') {
+                                setMode('QUIZ');
+                                setCurrentQuestionIdx(data.currentQuestionIdx || 0);
+                                resetQuestionState();
+                            } else if (data.status === 'FINISHED' && mode !== 'SUMMARY') {
+                                setMode('SUMMARY');
+                            } else if (data.status === 'PLAYING' && mode === 'QUIZ') {
+                                if (data.currentQuestionIdx !== currentQuestionIdx) {
+                                    setCurrentQuestionIdx(data.currentQuestionIdx);
+                                    resetQuestionState();
+                                }
+                            }
+                        }
+                    }
+                }, (error) => {
+                    console.error("Firestore snapshot error:", error);
+                });
+
+                return () => unsubscribe();
+            }, [roomCode, mode, currentQuestionIdx, isSolo]);
+
+            // Timer countdown logic
+            useEffect(() => {
+                let interval = null;
+                if (isTimerActive && timer > 0 && !answerSubmitted) {
+                    interval = setInterval(() => {
+                        setTimer(t => t - 1);
+                    }, 1000);
+                } else if (timer === 0 && !answerSubmitted) {
+                    // Time expired - auto submit wrong/no answer
+                    handleAnswerSelect(-1);
+                }
+                return () => clearInterval(interval);
+            }, [isTimerActive, timer, answerSubmitted]);
+
+            // Helper to generate 6-digit room code
+            const generateRoomCode = () => {
+                const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+                let code = 'TNIT-';
+                for (let i = 0; i < 3; i++) {
+                    code += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                return code;
+            };
+
+            const resetQuestionState = () => {
+                setSelectedAnswer(null);
+                setAnswerSubmitted(false);
+                setTimer(25);
+                setIsTimerActive(true);
+            };
+
+            // Action: Start Solo Mode
+            const startSoloGame = () => {
+                if (!userName.trim()) {
+                    showToast('אנא הזן את שמך הפרטי כדי להתחיל!', 'error');
+                    return;
+                }
+                localStorage.setItem('taanit_user_name', userName.trim());
+                setIsSolo(true);
+                setIsHost(true);
+                setScore(0);
+                setUserAnswersHistory([]);
+                setCurrentQuestionIdx(0);
+                setMode('QUIZ');
+                resetQuestionState();
+                playSound('click');
+            };
+
+            // Action: Create Room as Host
+            const createRoom = async () => {
+                if (!userName.trim()) {
+                    showToast('אנא הזן את שמך לפני יצירת חדר!', 'error');
+                    return;
+                }
+                localStorage.setItem('taanit_user_name', userName.trim());
+                const newCode = generateRoomCode();
+                setRoomCode(newCode);
+                setIsHost(true);
+                setIsSolo(false);
+
+                const hostPlayer = {
+                    id: userId,
+                    name: userName.trim(),
+                    score: 0,
+                    isHost: true,
+                    answers: []
+                };
+
+                if (db) {
+                    const { doc, setDoc } = window.FirebaseModule;
+                    const roomRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'rooms', newCode);
+                    await setDoc(roomRef, {
+                        code: newCode,
+                        hostId: userId,
+                        status: 'LOBBY',
+                        currentQuestionIdx: 0,
+                        players: [hostPlayer],
+                        createdAt: new Date().toISOString()
+                    });
+                } else {
+                    setPlayers([hostPlayer]);
+                }
+
+                setMode('LOBBY');
+                showToast(`חדר השיעור נוצר בהצלחה! הקוד: ${newCode}`, 'success');
+                playSound('click');
+            };
+
+            // Action: Join Room as Student
+            const joinRoom = async () => {
+                if (!userName.trim()) {
+                    showToast('אנא הזן את שמך לפני שתצטרף לחדר!', 'error');
+                    return;
+                }
+                const cleanCode = inputRoomCode.trim().toUpperCase();
+                if (!cleanCode) {
+                    showToast('אנא הזן קוד חדר תקין (לדוגמה TNIT-8A2)', 'error');
+                    return;
+                }
+                localStorage.setItem('taanit_user_name', userName.trim());
+
+                if (db) {
+                    const { doc, getDoc, updateDoc } = window.FirebaseModule;
+                    const roomRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'rooms', cleanCode);
+                    const snap = await getDoc(roomRef);
+
+                    if (!snap.exists()) {
+                        showToast('חדר לא נמצא. בדוק את הקוד ונסה שוב.', 'error');
+                        return;
+                    }
+
+                    const room = snap.data();
+                    const existingPlayers = room.players || [];
+                    
+                    // Add player if not already in list
+                    if (!existingPlayers.find(p => p.id === userId)) {
+                        const newPlayer = {
+                            id: userId,
+                            name: userName.trim(),
+                            score: 0,
+                            isHost: false,
+                            answers: []
+                        };
+                        const updated = [...existingPlayers, newPlayer];
+                        await updateDoc(roomRef, { players: updated });
+                    }
+
+                    setRoomCode(cleanCode);
+                    setIsHost(false);
+                    setIsSolo(false);
+                    setMode(room.status === 'PLAYING' ? 'QUIZ' : 'LOBBY');
+                } else {
+                    showToast('מצב אונליין דורש חיבור אינטרנט פעיל.', 'error');
+                }
+                playSound('click');
+            };
+
+            // Action: Host Starts Quiz for everyone
+            const handleHostStartQuiz = async () => {
+                if (isSolo) {
+                    setMode('QUIZ');
+                    resetQuestionState();
+                    return;
+                }
+
+                if (db && roomCode) {
+                    const { doc, updateDoc } = window.FirebaseModule;
+                    const roomRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'rooms', roomCode);
+                    await updateDoc(roomRef, {
+                        status: 'PLAYING',
+                        currentQuestionIdx: 0
+                    });
+                }
+                setMode('QUIZ');
+                resetQuestionState();
+                playSound('click');
+            };
+
+            // Action: Select Answer
+            const handleAnswerSelect = async (optIdx) => {
+                if (answerSubmitted) return;
+
+                setSelectedAnswer(optIdx);
+                setAnswerSubmitted(true);
+                setIsTimerActive(false);
+
+                const currentQ = TAANIT_QUESTIONS[currentQuestionIdx];
+                const isCorrect = optIdx === currentQ.correctAnswer;
+
+                // Speed bonus points calculation
+                const timeBonus = isCorrect ? Math.floor(timer * 15) : 0;
+                const pointsEarned = isCorrect ? (100 + timeBonus) : 0;
+                const newScore = score + pointsEarned;
+
+                if (isCorrect) playSound('correct');
+                else playSound('wrong');
+
+                setScore(newScore);
+                const answerRecord = {
+                    questionId: currentQ.id,
+                    selectedOption: optIdx,
+                    isCorrect,
+                    pointsEarned,
+                    timeSpent: 25 - timer
+                };
+                
+                const updatedAnswers = [...userAnswersHistory, answerRecord];
+                setUserAnswersHistory(updatedAnswers);
+
+                // Sync score to Firestore room if online
+                if (!isSolo && db && roomCode) {
+                    const { doc, getDoc, updateDoc } = window.FirebaseModule;
+                    const roomRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'rooms', roomCode);
+                    const snap = await getDoc(roomRef);
+
+                    if (snap.exists()) {
+                        const room = snap.data();
+                        const updatedPlayers = (room.players || []).map(p => {
+                            if (p.id === userId) {
+                                return { ...p, score: newScore, answers: updatedAnswers };
+                            }
+                            return p;
+                        });
+                        await updateDoc(roomRef, { players: updatedPlayers });
+                    }
+                }
+            };
+
+            // Action: Advance to next question or Finish
+            const handleNextQuestion = async () => {
+                const nextIdx = currentQuestionIdx + 1;
+
+                if (nextIdx < TAANIT_QUESTIONS.length) {
+                    if (!isSolo && isHost && db && roomCode) {
+                        const { doc, updateDoc } = window.FirebaseModule;
+                        const roomRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'rooms', roomCode);
+                        await updateDoc(roomRef, { currentQuestionIdx: nextIdx });
+                    } else {
+                        setCurrentQuestionIdx(nextIdx);
+                        resetQuestionState();
+                    }
+                } else {
+                    // Quiz Completed
+                    if (!isSolo && isHost && db && roomCode) {
+                        const { doc, updateDoc } = window.FirebaseModule;
+                        const roomRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'rooms', roomCode);
+                        await updateDoc(roomRef, { status: 'FINISHED' });
+                    }
+                    setMode('SUMMARY');
+                    // Launch Confetti
+                    if (window.confetti) {
+                        window.confetti({
+                            particleCount: 100,
+                            spread: 70,
+                            origin: { y: 0.6 }
+                        });
+                    }
+                }
+            };
+
+            // Calculate winner stats
+            const sortedPlayers = [...players].sort((a, b) => (b.score || 0) - (a.score || 0));
+            const winner = sortedPlayers[0];
+
+            return (
+                <div className="min-h-screen flex flex-col justify-between p-3 sm:p-6 max-w-5xl mx-auto text-slate-100">
+                    {/* Header Banner */}
+                    <header className="glass-card rounded-2xl p-4 sm:p-6 mb-6 gold-border flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
+                        <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center text-slate-950 text-2xl font-black shadow-lg">
+                                <i className="fas fa-book-quran"></i>
+                            </div>
+                            <div>
+                                <h1 className="text-2xl sm:text-3xl font-black talmud-font tracking-wide text-amber-300">
+                                    מסכת תענית - חידון השיעור
+                                </h1>
+                                <p className="text-xs sm:text-sm text-slate-300 font-medium">
+                                    נבחנים מפרק ראשון עד דף ט"ו • אונליין בזמן אמת
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Status bar */}
+                        {roomCode && !isSolo && (
+                            <div className="flex items-center bg-slate-800/80 px-4 py-2 rounded-xl border border-amber-500/30 space-x-3 rtl:space-x-reverse">
+                                <span className="text-xs text-slate-400 font-semibold">קוד החדר:</span>
+                                <span className="text-lg font-extrabold text-amber-400 tracking-wider font-mono">{roomCode}</span>
+                                <button 
+                                    onClick={() => {
+                                        document.execCommand('copy');
+                                        showToast('קוד החדר הועתק ללוח!', 'success');
+                                    }}
+                                    className="text-xs bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded text-amber-200 transition"
+                                    title="העתק קוד"
+                                >
+                                    <i className="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        )}
+                    </header>
+
+                    {/* SCREEN 1: WELCOME / LOGIN */}
+                    {mode === 'WELCOME' && (
+                        <div className="glass-card rounded-3xl p-6 sm:p-10 gold-border shadow-2xl my-auto animate-fade-in max-w-2xl mx-auto w-full">
+                            <div className="text-center mb-8">
+                                <div className="inline-block p-4 bg-amber-500/10 rounded-full border border-amber-500/30 mb-4">
+                                    <i className="fas fa-crown text-4xl text-amber-400"></i>
+                                </div>
+                                <h2 className="text-3xl font-bold text-white talmud-font">ברוכים הבאים לחידון התלמודי!</h2>
+                                <p className="text-slate-300 text-sm sm:text-base mt-2">
+                                    15 שאלות מאתגרות על סוגיות הגמרא, סדרי התעניות, הזכרת גשמים והאגדתות בדפים ב'–ט"ו.
+                                </p>
+                            </div>
+
+                            <div className="space-y-6">
+                                {/* User Name Input */}
+                                <div>
+                                    <label className="block text-sm font-bold text-amber-300 mb-2">
+                                        <i className="fas fa-user-graduate ml-2"></i> השם שלך לחידון:
+                                    </label>
+                                    <input 
+                                        type="text"
+                                        value={userName}
+                                        onChange={(e) => setUserName(e.target.value)}
+                                        placeholder="הכנס שם מלא או כינוי (לדוגמה: יוסף משיעור ב')"
+                                        className="w-full bg-slate-900/90 border border-slate-700 focus:border-amber-500 rounded-xl px-4 py-3 text-lg text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50 transition"
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                                    {/* Create Room */}
+                                    <button
+                                        onClick={createRoom}
+                                        className="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-bold py-4 px-6 rounded-xl shadow-lg transform active:scale-95 transition flex flex-col items-center justify-center space-y-1"
+                                    >
+                                        <div className="flex items-center space-x-2 rtl:space-x-reverse text-lg">
+                                            <i className="fas fa-plus-circle"></i>
+                                            <span>פתח חדר לשיעור</span>
+                                        </div>
+                                        <span className="text-xs text-slate-900 font-semibold opacity-90">(אתה מנהל החידון)</span>
+                                    </button>
+
+                                    {/* Join Room Option */}
+                                    <div className="bg-slate-800/80 p-4 rounded-xl border border-slate-700 flex flex-col justify-between space-y-3">
+                                        <label className="text-xs font-bold text-slate-300">הצטרף לחדר קיים בשיעור:</label>
+                                        <div className="flex space-x-2 rtl:space-x-reverse">
+                                            <input 
+                                                type="text"
+                                                value={inputRoomCode}
+                                                onChange={(e) => setInputRoomCode(e.target.value)}
+                                                placeholder="קוד (למשל TNIT-A82)"
+                                                className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-center uppercase font-mono font-bold text-amber-300 focus:outline-none focus:border-amber-400"
+                                            />
+                                            <button
+                                                onClick={joinRoom}
+                                                className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 py-2 rounded-lg text-sm transition"
+                                            >
+                                                הכנס
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="relative flex py-2 items-center">
+                                    <div className="flex-grow border-t border-slate-700"></div>
+                                    <span className="flex-shrink mx-4 text-slate-400 text-xs">או</span>
+                                    <div className="flex-grow border-t border-slate-700"></div>
+                                </div>
+
+                                {/* Solo practice button */}
+                                <button
+                                    onClick={startSoloGame}
+                                    className="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 font-bold py-3 px-6 rounded-xl transition flex items-center justify-center space-x-2 rtl:space-x-reverse"
+                                >
+                                    <i className="fas fa-user-ninja text-amber-400"></i>
+                                    <span>תרגול אישי בודד (ללא חדר אונליין)</span>
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* SCREEN 2: LOBBY */}
+                    {mode === 'LOBBY' && (
+                        <div className="glass-card rounded-3xl p-6 sm:p-10 gold-border shadow-2xl my-auto max-w-3xl mx-auto w-full">
+                            <div className="text-center mb-6">
+                                <span className="bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs px-4 py-1.5 rounded-full font-bold inline-block mb-3">
+                                    חדר המתנה לשיעור • {roomCode}
+                                </span>
+                                <h2 className="text-3xl font-black talmud-font text-white">מחכים לכל החברים מהשיעור...</h2>
+                                <p className="text-slate-300 text-sm mt-1">
+                                    שתפו את הקוד <strong className="text-amber-400 font-mono text-lg">{roomCode}</strong> עם הלומדים כדי שיכנסו.
+                                </p>
+                            </div>
+
+                            {/* Connected Players Grid */}
+                            <div className="bg-slate-900/80 rounded-2xl p-6 border border-slate-800 mb-8 min-h-[180px]">
+                                <h3 className="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-4 flex items-center justify-between">
+                                    <span>משתתפים בחדר ({players.length})</span>
+                                    <i className="fas fa-users text-amber-400"></i>
+                                </h3>
+
+                                {players.length === 0 ? (
+                                    <div className="text-center text-slate-500 py-8">
+                                        <i className="fas fa-spinner fa-spin text-2xl mb-2 text-amber-500/60"></i>
+                                        <p>מחבר משתתפים...</p>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                                        {players.map((p, idx) => (
+                                            <div key={p.id || idx} className="bg-slate-800/90 border border-slate-700/80 rounded-xl p-3 flex items-center space-x-3 rtl:space-x-reverse animate-pulse-once">
+                                                <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-amber-600 to-amber-400 text-slate-950 font-bold flex items-center justify-center text-sm">
+                                                    {p.name ? p.name.charAt(0) : '?'}
+                                                </div>
+                                                <div className="truncate">
+                                                    <p className="font-bold text-sm text-slate-200 truncate">{p.name}</p>
+                                                    {p.isHost && <span className="text-[10px] text-amber-400 font-extrabold">מנהל החידון</span>}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Control Actions */}
+                            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                                <button
+                                    onClick={() => { setMode('WELCOME'); setRoomCode(''); }}
+                                    className="w-full sm:w-auto px-6 py-3 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 transition text-sm font-bold"
+                                >
+                                    <i className="fas fa-arrow-right ml-2"></i> יציאה מהחדר
+                                </button>
+
+                                {isHost ? (
+                                    <button
+                                        onClick={handleHostStartQuiz}
+                                        className="w-full sm:w-auto bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-8 py-4 rounded-xl text-lg shadow-xl transform active:scale-95 transition flex items-center justify-center space-x-2 rtl:space-x-reverse"
+                                    >
+                                        <i className="fas fa-play text-xl"></i>
+                                        <span>התחל את החידון לכולם!</span>
+                                    </button>
+                                ) : (
+                                    <div className="text-amber-400 text-sm font-bold bg-amber-500/10 px-6 py-3 rounded-xl border border-amber-500/30 animate-pulse flex items-center space-x-2 rtl:space-x-reverse">
+                                        <i className="fas fa-hourglass-half"></i>
+                                        <span>ממתין למנהל השיעור שיתחיל את המשחק...</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* SCREEN 3: ACTIVE QUIZ */}
+                    {mode === 'QUIZ' && (
+                        <div className="space-y-6 max-w-3xl mx-auto w-full my-auto">
+                            {/* Question Progress & Timer */}
+                            <div className="glass-card rounded-2xl p-4 gold-border flex items-center justify-between shadow-lg">
+                                <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                                    <span className="bg-amber-500 text-slate-950 font-black text-sm px-3 py-1 rounded-lg">
+                                        שאלה {currentQuestionIdx + 1} / {TAANIT_QUESTIONS.length}
+                                    </span>
+                                    <span className="text-xs text-slate-400 font-semibold hidden sm:inline">
+                                        {TAANIT_QUESTIONS[currentQuestionIdx].source}
+                                    </span>
+                                </div>
+
+                                {/* Timer Badge */}
+                                <div className={`flex items-center space-x-2 rtl:space-x-reverse px-4 py-1.5 rounded-xl border font-mono font-bold transition-all ${
+                                    timer <= 5 ? 'bg-red-500/20 text-red-400 border-red-500 animate-ping-slow' : 'bg-slate-800 text-amber-400 border-slate-700'
+                                }`}>
+                                    <i className="fas fa-clock"></i>
+                                    <span className="text-lg">{timer}s</span>
+                                </div>
+
+                                {/* Score counter */}
+                                <div className="bg-slate-800 px-3 py-1 rounded-lg border border-slate-700 text-xs font-bold text-amber-300">
+                                    ניקוד: <span className="text-white text-sm font-extrabold">{score}</span>
+                                </div>
+                            </div>
+
+                            {/* Main Question Card */}
+                            <div className="glass-card rounded-3xl p-6 sm:p-8 gold-border shadow-2xl relative overflow-hidden">
+                                {/* Decorative Talmud Quote Badge */}
+                                <div className="mb-4 inline-block bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-bold px-3 py-1 rounded-md">
+                                    <i className="fas fa-bookmark ml-1.5"></i> סוגיית הגמרא
+                                </div>
+
+                                <h2 className="text-xl sm:text-2xl font-bold text-slate-100 leading-relaxed font-serif mb-8">
+                                    {TAANIT_QUESTIONS[currentQuestionIdx].question}
+                                </h2>
+
+                                {/* Answer Choices */}
+                                <div className="space-y-3">
+                                    {TAANIT_QUESTIONS[currentQuestionIdx].options.map((optionText, optIdx) => {
+                                        let btnStyle = "bg-slate-800/90 hover:bg-slate-700/90 border-slate-700 text-slate-200";
+                                        
+                                        if (answerSubmitted) {
+                                            if (optIdx === TAANIT_QUESTIONS[currentQuestionIdx].correctAnswer) {
+                                                btnStyle = "bg-emerald-600/90 border-emerald-400 text-white font-bold ring-2 ring-emerald-400";
+                                            } else if (optIdx === selectedAnswer) {
+                                                btnStyle = "bg-red-600/90 border-red-400 text-white ring-2 ring-red-400";
+                                            } else {
+                                                btnStyle = "bg-slate-900/50 border-slate-800 text-slate-500 opacity-50";
+                                            }
+                                        }
+
+                                        return (
+                                            <button
+                                                key={optIdx}
+                                                disabled={answerSubmitted}
+                                                onClick={() => handleAnswerSelect(optIdx)}
+                                                className={`w-full text-right p-4 rounded-xl border text-sm sm:text-base transition-all duration-200 flex items-start space-x-3 rtl:space-x-reverse ${btnStyle}`}
+                                            >
+                                                <span className="w-7 h-7 rounded-lg bg-slate-950/40 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 border border-white/10">
+                                                    {String.fromCharCode(1488 + optIdx)}
+                                                </span>
+                                                <span className="leading-normal">{optionText}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+
+                                {/* Explanation Box upon submitting */}
+                                {answerSubmitted && (
+                                    <div className="mt-6 p-4 rounded-2xl bg-amber-950/40 border border-amber-500/40 animate-fade-in text-sm space-y-2">
+                                        <div className="flex items-center text-amber-300 font-bold space-x-2 rtl:space-x-reverse">
+                                            <i className="fas fa-lightbulb text-amber-400"></i>
+                                            <span>ביאור ומקור מהגמרא:</span>
+                                        </div>
+                                        <p className="text-slate-300 leading-relaxed font-serif text-sm">
+                                            {TAANIT_QUESTIONS[currentQuestionIdx].explanation}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Control Next Button */}
+                            {answerSubmitted && (
+                                <div className="flex justify-end animate-fade-in">
+                                    <button
+                                        onClick={handleNextQuestion}
+                                        className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-8 py-3.5 rounded-xl text-base shadow-xl transform active:scale-95 transition flex items-center space-x-2 rtl:space-x-reverse"
+                                    >
+                                        <span>
+                                            {currentQuestionIdx < TAANIT_QUESTIONS.length - 1 ? 'לשאלה הבאה' : 'לסיום והכרזת הזוכה!'}
+                                        </span>
+                                        <i className="fas fa-arrow-left"></i>
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* Live leaderboard mini strip */}
+                            {!isSolo && players.length > 0 && (
+                                <div className="bg-slate-900/60 rounded-xl p-3 border border-slate-800 text-xs text-slate-400 flex items-center justify-between">
+                                    <span>מוביל כעת בשיעור:</span>
+                                    <div className="flex items-center space-x-2 rtl:space-x-reverse font-bold text-amber-300">
+                                        <i className="fas fa-trophy text-amber-400"></i>
+                                        <span>{sortedPlayers[0]?.name || '-'} ({sortedPlayers[0]?.score || 0} נק')</span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* SCREEN 4: SUMMARY & WINNER ANNOUNCEMENT */}
+                    {mode === 'SUMMARY' && (
+                        <div className="glass-card rounded-3xl p-6 sm:p-10 gold-border shadow-2xl my-auto max-w-3xl mx-auto w-full animate-fade-in text-center">
+                            <div className="inline-block p-4 bg-amber-500/20 rounded-full border border-amber-500/40 mb-4 pulse-gold">
+                                <i className="fas fa-trophy text-5xl text-amber-400"></i>
+                            </div>
+
+                            <h2 className="text-3xl sm:text-4xl font-black talmud-font text-amber-300 mb-2">
+                                כל הכבוד! חידון מסכת תענית הושלם!
+                            </h2>
+                            <p className="text-slate-300 text-sm mb-8">
+                                אשריכם שזכיתם לעבור על הדינים, המשניות והאגדתות בדפים ב'–ט"ו!
+                            </p>
+
+                            {/* Winner podium for online room */}
+                            {!isSolo && winner && (
+                                <div className="bg-gradient-to-b from-amber-500/20 to-slate-900/90 border border-amber-500/50 rounded-2xl p-6 mb-8 text-center shadow-xl">
+                                    <span className="text-xs font-bold uppercase tracking-widest text-amber-400 block mb-1">
+                                        🥇 המנצח הגדול בשיעור
+                                    </span>
+                                    <h3 className="text-3xl font-black text-white mb-2">{winner.name}</h3>
+                                    <p className="text-2xl font-extrabold text-amber-300">{winner.score} נקודות</p>
+                                </div>
+                            )}
+
+                            {/* User Personal Result */}
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
+                                <div className="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+                                    <span className="text-xs text-slate-400 font-bold block mb-1">הניקוד שלך</span>
+                                    <span className="text-2xl font-black text-amber-400">{score}</span>
+                                </div>
+                                <div className="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+                                    <span className="text-xs text-slate-400 font-bold block mb-1">תשובות נכונות</span>
+                                    <span className="text-2xl font-black text-emerald-400">
+                                        {userAnswersHistory.filter(a => a.isCorrect).length} / {TAANIT_QUESTIONS.length}
+                                    </span>
+                                </div>
+                                <div className="col-span-2 sm:col-span-1 bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+                                    <span className="text-xs text-slate-400 font-bold block mb-1">אחוז דיוק</span>
+                                    <span className="text-2xl font-black text-blue-400">
+                                        {Math.round((userAnswersHistory.filter(a => a.isCorrect).length / TAANIT_QUESTIONS.length) * 100)}%
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Full Leaderboard Table (if room) */}
+                            {!isSolo && sortedPlayers.length > 0 && (
+                                <div className="bg-slate-900/90 rounded-2xl p-4 border border-slate-800 mb-8 text-right">
+                                    <h4 className="text-sm font-extrabold text-slate-300 mb-3 flex items-center justify-between">
+                                        <span>טבלת המובילים בשיעור</span>
+                                        <i className="fas fa-list-ol text-amber-400"></i>
+                                    </h4>
+                                    <div className="space-y-2 max-h-48 overflow-y-auto pl-2">
+                                        {sortedPlayers.map((p, idx) => (
+                                            <div key={p.id || idx} className={`flex items-center justify-between p-2.5 rounded-xl text-sm ${
+                                                idx === 0 ? 'bg-amber-500/20 border border-amber-500/40 text-amber-200' : 'bg-slate-800/80 text-slate-300'
+                                            }`}>
+                                                <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                                                    <span className="w-6 h-6 rounded-full bg-slate-950 flex items-center justify-center font-bold text-xs text-amber-400">
+                                                        {idx + 1}
+                                                    </span>
+                                                    <span className="font-bold">{p.name}</span>
+                                                </div>
+                                                <span className="font-extrabold font-mono">{p.score || 0} נק'</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Restart actions */}
+                            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                                <button
+                                    onClick={() => {
+                                        setMode('WELCOME');
+                                        setRoomCode('');
+                                        setScore(0);
+                                        setUserAnswersHistory([]);
+                                    }}
+                                    className="w-full sm:w-auto bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-8 py-3.5 rounded-xl transition shadow-lg"
+                                >
+                                    <i className="fas fa-redo ml-2"></i> התחל חידון חדש
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Toast Alert popup */}
+                    {toastMessage && (
+                        <Toast 
+                            message={toastMessage.text} 
+                            type={toastMessage.type} 
+                            onClose={() => setToastMessage(null)} 
+                        />
+                    )}
+
+                    {/* Footer */}
+                    <footer className="text-center py-4 text-xs text-slate-500 mt-6 border-t border-slate-800/80">
+                        חידון מסכת תענית בזמן אמת • מוקדש ללומדי התורה ולשיעורי העיון • ערוך ומבוסס עד דף ט"ו
+                    </footer>
+                </div>
+            );
+        }
+
+        const { useState, useEffect } = React;
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
